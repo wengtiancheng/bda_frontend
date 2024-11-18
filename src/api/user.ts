@@ -30,15 +30,17 @@ export const userRegister = (registerInfo: RegisterInfo) => {
 }
 
 //将某个用户升级为vip
-export const upgradeToVip = (userId: number) => {
-    return axios.post(`${USER_MODULE}/vip`, null, {params: {userId}})
+export const upgradeToVip = (userName: string) => {
+    return axios.post(`${USER_MODULE}/vip`, null, {params: {userName}})
         .then(res =>{
             return res
         })
 }
-export const userInfo = () => {
-    return axios.get(`${USER_MODULE}`)
-        .then(res => {
+
+//根据username获取用户信息
+export const getUserInfo = (userName: string) => {
+    return axios.get(`${USER_MODULE}/info`, {params: {userName}})
+        .then(res =>{
             return res
         })
 }

@@ -34,7 +34,7 @@ function handleRegister(){
         role: role.value,
         email: email.value
     }).then(res => {
-        if(res.data.code === '000'){
+        if(res.status = 200){
             ElMessage.success({
                 message: "注册成功",
                 type: "success",

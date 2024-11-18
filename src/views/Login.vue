@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { userLogin, userInfo } from '../api/user.ts';
+import { userLogin, getUserInfo} from '../api/user.ts';
 import {router} from '../router'
 import {ElMessage} from "element-plus";
 
@@ -20,20 +20,27 @@ function handleLogin() {
         username: username.value,
         password: password.value
     }).then(res => {
-        if(res.data.code === '000'){
+
+        if(res.status === 200){
             ElMessage.success({
                 message: "登录成功",
                 type: "success",
                 center: true,
             });
-            const token = res.data.result
-            sessionStorage.setItem('token', token)
+            console.log(res)
 
-            userInfo().then(res => {
-                sessionStorage.setItem('username', res.data.result.name)
-                sessionStorage.setItem('role', res.data.result.role)
-                router.push({path: '/home'})
+            sessionStorage.setItem('token', res.data)
+            sessionStorage.setItem('username', username.value)
+            console.log(sessionStorage.getItem('token'))
+
+            getUserInfo(username.value).then(res => {
+                sessionStorage.setItem('role', res.data)
+                router.push({path: '/main'}).then(() => {
+                    window.location.reload()
+                })
+
             })
+
         }
     })
     

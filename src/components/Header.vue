@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import {Search, SwitchButton} from "@element-plus/icons-vue"
 import {useRouter} from "vue-router";
-import {ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {User, Document, Discount} from "@element-plus/icons-vue"
+import {upgradeToVip} from "../api/user.ts";
 
 const router = useRouter()
 const username = sessionStorage.getItem('username') || '未登录'
+const role = sessionStorage.getItem('role') || 'error'
 
 function logout(){
   ElMessageBox.confirm(
@@ -26,25 +28,48 @@ function logout(){
   }
   )
 }
-//变成vip
 function becomeVip(){
-  ElMessageBox.confirm(
-    '是否要成为VIP？',
-    '提示',
-    {
-      customClass: "customDialog",
-      confirmButtonText: '是',
-      cancelButtonText: '否',
-      type: "warning",
-      showClose: false,
-      roundButton: true,
-      center: true
-    }
-  ).then(() => {
-    // 成为VIP的逻辑
+  if(role === 'VIP'){
+    ElMessage.error({
+      message: "您已经是VIP了",
+      type: "error",
+      center: true,
+    });
+    return
   }
+  ElMessageBox.confirm(
+      '是否要成为VIP？',
+      '提示',
+      {
+        customClass: "customDialog",
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: "warning",
+        showClose: false,
+        roundButton: true,
+        center: true
+      }
+  ).then(() => {
+        // 成为VIP的逻辑
+        upgradeToVip(username).then(res => {
+          if(res.data.code === '000'){
+            ElMessage.success({
+              message: "成为VIP成功",
+              type: "success",
+              center: true,
+            });
+          }else if(res.data.code === '400'){
+            ElMessage.error({
+              message: res.data.msg,
+              type: "error",
+              center: true,
+            });
+          }
+        })
+      }
   )
 }
+
 
 </script>
 
@@ -61,19 +86,16 @@ function becomeVip(){
 
 
       <el-col :span="12"></el-col>
-      <el-col :span="3" class="header-text">欢迎{{username}}!</el-col>
+      <el-col :span="3" class="header-text">欢迎 {{username}}!</el-col>
 
 
 
 
       <el-col :span="1" class="header-icon">
-        <router-link to="/dashboard" v-slot="{navigate}">
-          <el-icon @click="navigate" :size="35" color="white" ><User /></el-icon>
-        </router-link>
+        <a @click="becomeVip">
+          <el-icon :size="35" color="white" ><User /></el-icon>
+        </a>
       </el-col>
-
-
-
 
 
       <el-col :span="1" class="header-icon">

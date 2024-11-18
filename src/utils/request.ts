@@ -12,7 +12,7 @@ function hasToken() {
 service.interceptors.request.use(
     config => {
         if(hasToken()) {
-            config.headers['token'] = sessionStorage.getItem('token')
+            config.headers['Authorization'] = sessionStorage.getItem('token')
         }
         return config
     },

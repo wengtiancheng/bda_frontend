@@ -18,6 +18,7 @@ const referencePaper = ref([])
 const sameCategoryPaper = ref([])
 const similarPaper = ref([])
 const activeTab = ref('reference')
+const role = sessionStorage.getItem('role') || 'error'
 
 
 function getPaperDetail() {
@@ -48,9 +49,22 @@ function getSimilar() {
   })
 }
 
+function getCurrentPaperList(){
+  if(activeTab.value === 'reference'){
+    return referencePaper.value
+  }else if(activeTab.value === 'similar'){
+    return similarPaper.value
+  }else if(activeTab.value === 'category'){
+    return sameCategoryPaper.value
+  }
+
+}
+
 getReference()
 getSimilar()
 getCategory()
+
+
 
 </script>
 

@@ -4,7 +4,8 @@ import {useRouter} from "vue-router";
 import { defineProps, ref } from 'vue';
 import {Search} from "@element-plus/icons-vue";
 import {searchPaper} from "../api/paper.ts";
-import {ElMessage} from "element-plus";
+
+import {ElMessage, ElMessageBox} from "element-plus";
 import paperItem from "../components/paperItem.vue";
 
 const router = useRouter();
@@ -12,6 +13,8 @@ const router = useRouter();
 const input = ref('');
 
 const paperList = ref();
+
+const username = sessionStorage.getItem('username') || '未登录'
 
 function search() {
   if(input.value === ''){
@@ -33,8 +36,12 @@ function search() {
 }
 
 function toPaperDetailPage(paperId: number) {
-  router.push({path: `/paperDetail/${paperId}`})
+  router.push({path: `/paperDetail/${paperId}`}).then(() => {
+    window.location.reload()
+  })
 }
+
+
 
 </script>
 
