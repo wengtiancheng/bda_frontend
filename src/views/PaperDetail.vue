@@ -14,7 +14,7 @@ const router = useRouter()
 const paperId = Number(route.params.paperId)
 const title = ref('')
 const abstract = ref('')
-const category = ref<string>('')
+const category = ref('')
 const year = ref('')
 
 const referencePaper = ref([])
@@ -34,6 +34,15 @@ function getPaperDetail() {
     abstract.value = res.data.abstractText
     category.value = res.data.category
     year.value = res.data.year
+    getPaperByCategory(category.value).then(res => {
+      sameCategoryPaper.value = res.data
+    })
+    getSimilarPaper(paperId).then(res => {
+      similarPaper.value = res.data
+    })
+    getReferencePaper(paperId).then(res => {
+      referencePaper.value = res.data
+    })
   })
 }
 
@@ -45,6 +54,7 @@ function getReference() {
   })
 }
 function getCategory() {
+
     getPaperByCategory(category.value).then(res => {
       console.log(category.value)
       console.log(res)
@@ -120,12 +130,15 @@ function toPaperDetailPage(paperId: number) {
   })
 }
 
+// async function initialize() {
+//   await getPaperDetail();
+//   getReference();
+//   getSimilar();
+//   getCategory();
+// }
+//
+// initialize();
 getPaperDetail()
-getReference()
-getSimilar()
-getCategory()
-
-
 
 </script>
 

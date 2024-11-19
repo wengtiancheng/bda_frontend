@@ -63,6 +63,8 @@ const props = defineProps({
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
+
+  text-align: left;
 }
 
 .paper-details {
