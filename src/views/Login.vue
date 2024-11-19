@@ -33,6 +33,7 @@ function handleLogin() {
             sessionStorage.setItem('username', username.value)
             console.log(sessionStorage.getItem('token'))
 
+
             getUserInfo(username.value).then(res => {
                 sessionStorage.setItem('role', res.data)
                 router.push({path: '/main'}).then(() => {
@@ -40,6 +41,9 @@ function handleLogin() {
                 })
 
             })
+
+        }else{
+          console.log(res)
 
         }
     })

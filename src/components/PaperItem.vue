@@ -2,22 +2,32 @@
 import { ref, computed } from 'vue'
 import { getPaperById } from '../api/paper.ts'
 
+
+
 // 使用 props 接收父组件传递的数据
 const props = defineProps({
   paperId: {
     type: Number,
     required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true,
+    //默认值
+    default: '未知',
+  },
+  year: {
+    type: Number,
+    required: true,
   }
 })
-const title = ref('默认标题')
-const category = ref('默认类别')
-const year = ref('默认年份')
 
-getPaperById(props.paperId).then(res => {
-  title.value = res.data.result.title || '默认标题'
-  category.value = res.data.result.category || '默认类别'
-  year.value = res.data.result.year || '默认年份'
-})
+
+
 </script>
 
 <template>

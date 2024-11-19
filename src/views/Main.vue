@@ -12,9 +12,13 @@ const router = useRouter();
 
 const input = ref('');
 
-const paperList = ref();
+const paperList = ref([]);
 
 const username = sessionStorage.getItem('username') || '未登录'
+
+const currentPage = ref(1);
+
+const pageSize = 5;
 
 function search() {
   if(input.value === ''){
@@ -26,12 +30,13 @@ function search() {
     return
   }
   searchPaper(input.value).then(res => {
+    console.log(res)
     ElMessage.success({
       message: "查询成功",
       type: "success",
       center: true,
     });
-    paperList.value = res.data.result;
+    paperList.value = res.data;
   })
 }
 
@@ -41,6 +46,9 @@ function toPaperDetailPage(paperId: number) {
   })
 }
 
+function handlePageChange(page: number) {
+  currentPage.value = page;
+}
 
 
 </script>
@@ -59,15 +67,19 @@ function toPaperDetailPage(paperId: number) {
     <div class="result-main">
       <h2 class="result-title">搜索结果</h2>
       <div class="paper-list">
-        <paper-item v-for="item in paperList" :key="item.id" :paperId="item.id" @click="toPaperDetailPage(item.id)"></paper-item>
-        <paper-item paper-id="1"></paper-item>
-        <paper-item paper-id="2"></paper-item>
-        <paper-item paper-id="3"></paper-item>
-        <paper-item paper-id="4"></paper-item>
-        <paper-item paper-id="5"></paper-item>
-        <paper-item paper-id="6"></paper-item>
-        <paper-item paper-id="7"></paper-item>
+        <paper-item v-for="item in paperList" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
+
       </div>
+      <el-pagination
+        v-if="paperList.length > pageSize"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :total="paperList.length"
+        @current-change="handlePageChange"
+        layout="prev, pager, next">
+
+      </el-pagination>
+
 
     </div>
   </div>

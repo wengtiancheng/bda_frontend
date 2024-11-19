@@ -3,6 +3,8 @@ import {useRoute} from 'vue-router'
 import {getPaperById, getPaperByCategory, getReferencePaper, getSimilarPaper} from "../api/paper.ts";
 import {ref} from "vue";
 import PaperItem from "@/components/PaperItem.vue";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {upgradeToVip} from "../api/user.ts";
 
 
 
@@ -18,47 +20,99 @@ const referencePaper = ref([])
 const sameCategoryPaper = ref([])
 const similarPaper = ref([])
 const activeTab = ref('reference')
-const role = sessionStorage.getItem('role') || 'error'
+const role = ref(sessionStorage.getItem('role') || 'error')
+const username = sessionStorage.getItem('username') || '未登录'
 
 
 function getPaperDetail() {
   console.log(paperId)
+
   getPaperById(paperId).then(res => {
-    title.value = res.data.result.title
-    abstract.value = res.data.result.abstract
-    category.value = res.data.result.category
-    year.value = res.data.result.year
+    console.log(res)
+    title.value = res.data.title
+    abstract.value = res.data.abstractText
+    category.value = res.data.category
+    year.value = res.data.year
   })
 }
 getPaperDetail()
 
 function getReference() {
   getReferencePaper(paperId).then(res => {
-    referencePaper.value = res.data.result
+
+    referencePaper.value = res.data
   })
 }
 function getCategory() {
   getPaperByCategory(category.value).then(res => {
-    sameCategoryPaper.value = res.data.result
+    console.log(res)
+    sameCategoryPaper.value = res.data
   })
 }
 
 function getSimilar() {
   getSimilarPaper(paperId).then(res => {
-    similarPaper.value = res.data.result
+    similarPaper.value = res.data
   })
 }
 
 function getCurrentPaperList(){
   if(activeTab.value === 'reference'){
     return referencePaper.value
-  }else if(activeTab.value === 'similar'){
+  }else if(activeTab.value === 'similar' && role.value === 'VIP'){
     return similarPaper.value
-  }else if(activeTab.value === 'category'){
+  }else if(activeTab.value === 'category' && role.value === 'VIP'){
     return sameCategoryPaper.value
   }
 
 }
+function becomeVip(){
+  if(role.value === 'VIP'){
+    ElMessage.info({
+      message: "您已经是VIP了",
+      type: "error",
+      center: true,
+    });
+    return
+  }
+  ElMessageBox.confirm(
+      '是否要成为VIP？',
+      '提示',
+      {
+        customClass: "customDialog",
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: "warning",
+        showClose: false,
+        roundButton: true,
+        center: true
+      }
+  ).then(() => {
+        // 成为VIP的逻辑
+        upgradeToVip(username).then(res => {
+          console.log(res)
+          if(res.status === 200){
+            //更新sessionStorage
+            sessionStorage.setItem('role', 'VIP')
+            //更新role
+            role.value = 'VIP'
+            ElMessage.success({
+              message: "成为VIP成功",
+              type: "success",
+              center: true,
+            });
+          }else{
+            ElMessage.error({
+              message: res.data.msg,
+              type: "error",
+              center: true,
+            });
+          }
+        })
+      }
+  )
+}
+
 
 getReference()
 getSimilar()
@@ -72,20 +126,20 @@ getCategory()
   <!-- Paper Detail -->
   <div class="main-content">
     <div class="paper-details">
-      <h2 class="paper-title">Evasion Attacks against Machine Learning at Test Time</h2>
+      <h2 class="paper-title">{{title}}</h2>
       <div class="paper-abstract">
         <div class="abstract">摘要</div>
         <p>
-          Evasion attacks against machine learning (ML) models are a well-studied class of attacks that aim to manipulate the model's prediction by adding carefully crafted perturbations to the input data. In this paper, we study evasion attacks against ML models at test time, where the attacker has no knowledge of the model's parameters and architecture. We propose a novel attack algorithm, called the Zeroth Order Projection Attack (ZOPA), that requires only query access to the target model. ZOPA is based on a novel zeroth order optimization algorithm that estimates the gradient of the model's loss function by querying the model. We show that ZOPA is effective against a variety of ML models, including deep neural networks, and that it outperforms existing black-box attacks in terms of query efficiency and success rate. We also demonstrate that ZOPA is robust to common defenses, such as input transformation and gradient masking. Finally, we show that ZOPA can be used to attack real-world ML models, such as those used in computer vision and malware detection.
+          {{abstract}}
         </p>
       </div>
       <div class="paper-category">
         <div class="category">类别</div>
-        <p>Security and Privacy</p>
+        <p>{{category}}</p>
       </div>
       <div class="paper-category">
         <div class="category">年份</div>
-        <p>2004</p>
+        <p>{{year}}</p>
       </div>
     </div>
     <div class="tabs-section">
@@ -96,8 +150,15 @@ getCategory()
 
       </el-tabs>
       <div class="paper-list">
-        <paper-item paper-id="1"></paper-item>
-        <paper-item paper-id="2"></paper-item>
+        <template v-if="activeTab === 'reference' || role === 'VIP'">
+          <paper-item v-for="item in getCurrentPaperList()" :key="item.id" :paperId="item.id"></paper-item>
+        </template>
+        <template v-else>
+          <div class="vip-message">
+            <p>只有VIP用户才能查看此内容</p>
+          </div>
+          <el-button type="primary" @click="becomeVip">成为VIP</el-button>
+        </template>
       </div>
     </div>
   </div>
@@ -115,6 +176,7 @@ getCategory()
   flex-direction: column;
   gap: 20px;
   margin-top: 20px;
+  margin-bottom: 20px;
 
 }
 .paper-details {
@@ -156,12 +218,22 @@ getCategory()
   background-color: #f0f4f8;
   border-radius: 10px;
   margin-top: 10px;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
 .paper-item {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  margin-bottom: 10px;
+}
+.vip-message {
+  text-align: center;
+  padding: 30px;
+  gap:20px;
+  border-radius: 5px;
+  margin-top: 10px;
   margin-bottom: 10px;
 }
 

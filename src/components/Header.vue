@@ -4,10 +4,13 @@ import {useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {User, Document, Discount} from "@element-plus/icons-vue"
 import {upgradeToVip} from "../api/user.ts";
+import {ref} from "vue";
 
 const router = useRouter()
 const username = sessionStorage.getItem('username') || '未登录'
-const role = sessionStorage.getItem('role') || 'error'
+const role = ref(sessionStorage.getItem('role') || 'error')
+
+
 
 function logout(){
   ElMessageBox.confirm(
@@ -29,8 +32,8 @@ function logout(){
   )
 }
 function becomeVip(){
-  if(role === 'VIP'){
-    ElMessage.error({
+  if(role.value === 'VIP'){
+    ElMessage.info({
       message: "您已经是VIP了",
       type: "error",
       center: true,
@@ -52,13 +55,18 @@ function becomeVip(){
   ).then(() => {
         // 成为VIP的逻辑
         upgradeToVip(username).then(res => {
-          if(res.data.code === '000'){
+          console.log(res)
+          if(res.status === 200){
+            //更新sessionStorage
+            sessionStorage.setItem('role', 'VIP')
+            //更新role
+            role.value = 'VIP'
             ElMessage.success({
               message: "成为VIP成功",
               type: "success",
               center: true,
             });
-          }else if(res.data.code === '400'){
+          }else{
             ElMessage.error({
               message: res.data.msg,
               type: "error",
