@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {getPaperById, getPaperByCategory, getReferencePaper, getSimilarPaper} from "../api/paper.ts";
 import {ref} from "vue";
 import PaperItem from "@/components/PaperItem.vue";
@@ -10,10 +10,11 @@ import {upgradeToVip} from "../api/user.ts";
 
 
 const route = useRoute()
+const router = useRouter()
 const paperId = Number(route.params.paperId)
 const title = ref('')
 const abstract = ref('')
-const category = ref('')
+const category = ref<string>('')
 const year = ref('')
 
 const referencePaper = ref([])
@@ -35,7 +36,7 @@ function getPaperDetail() {
     year.value = res.data.year
   })
 }
-getPaperDetail()
+
 
 function getReference() {
   getReferencePaper(paperId).then(res => {
@@ -44,9 +45,10 @@ function getReference() {
   })
 }
 function getCategory() {
-  getPaperByCategory(category.value).then(res => {
-    console.log(res)
-    sameCategoryPaper.value = res.data
+    getPaperByCategory(category.value).then(res => {
+      console.log(category.value)
+      console.log(res)
+      sameCategoryPaper.value = res.data
   })
 }
 
@@ -112,8 +114,13 @@ function becomeVip(){
       }
   )
 }
+function toPaperDetailPage(paperId: number) {
+  router.push({path: `/paperDetail/${paperId}`}).then(() => {
+    window.location.reload()
+  })
+}
 
-
+getPaperDetail()
 getReference()
 getSimilar()
 getCategory()
@@ -151,7 +158,7 @@ getCategory()
       </el-tabs>
       <div class="paper-list">
         <template v-if="activeTab === 'reference' || role === 'VIP'">
-          <paper-item v-for="item in getCurrentPaperList()" :key="item.id" :paperId="item.id"></paper-item>
+          <paper-item v-for="item in getCurrentPaperList()" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
         </template>
         <template v-else>
           <div class="vip-message">
