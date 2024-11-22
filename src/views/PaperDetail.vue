@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useRoute, useRouter} from 'vue-router'
 import {getPaperById, getPaperByCategory, getReferencePaper, getSimilarPaper} from "../api/paper.ts";
-import {ref} from "vue";
+import {ref, computed} from "vue";
 import PaperItem from "@/components/PaperItem.vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {upgradeToVip} from "../api/user.ts";
@@ -23,6 +23,30 @@ const similarPaper = ref([])
 const activeTab = ref('reference')
 const role = ref(sessionStorage.getItem('role') || 'error')
 const username = sessionStorage.getItem('username') || '未登录'
+
+const currentPageReference = ref(1);
+const currentPageSimilar = ref(1);
+const currentPageCategory = ref(1);
+const pageSize = 10;
+
+
+const paginatedReferencePapers = computed(() => {
+  const start = (currentPageReference.value - 1) * pageSize;
+  const end = start + pageSize;
+  return referencePaper.value.slice(start, end);
+});
+
+const paginatedSimilarPapers = computed(() => {
+  const start = (currentPageSimilar.value - 1) * pageSize;
+  const end = start + pageSize;
+  return similarPaper.value.slice(start, end);
+});
+
+const paginatedCategoryPapers = computed(() => {
+  const start = (currentPageCategory.value - 1) * pageSize;
+  const end = start + pageSize;
+  return sameCategoryPaper.value.slice(start, end);
+});
 
 
 function getPaperDetail() {
@@ -47,37 +71,18 @@ function getPaperDetail() {
 }
 
 
-function getReference() {
-  getReferencePaper(paperId).then(res => {
 
-    referencePaper.value = res.data
-  })
-}
-function getCategory() {
 
-    getPaperByCategory(category.value).then(res => {
-      console.log(category.value)
-      console.log(res)
-      sameCategoryPaper.value = res.data
-  })
-}
-
-function getSimilar() {
-  getSimilarPaper(paperId).then(res => {
-    similarPaper.value = res.data
-  })
-}
-
-function getCurrentPaperList(){
-  if(activeTab.value === 'reference'){
-    return referencePaper.value
-  }else if(activeTab.value === 'similar' && role.value === 'VIP'){
-    return similarPaper.value
-  }else if(activeTab.value === 'category' && role.value === 'VIP'){
-    return sameCategoryPaper.value
+function getCurrentPaperList() {
+  if (activeTab.value === 'reference') {
+    return paginatedReferencePapers.value;
+  } else if (activeTab.value === 'similar' && role.value === 'VIP') {
+    return paginatedSimilarPapers.value;
+  } else if (activeTab.value === 'category' && role.value === 'VIP') {
+    return paginatedCategoryPapers.value;
   }
-
 }
+
 function becomeVip(){
   if(role.value === 'VIP'){
     ElMessage.info({
@@ -108,6 +113,9 @@ function becomeVip(){
             sessionStorage.setItem('role', 'VIP')
             //更新role
             role.value = 'VIP'
+
+            //刷新页面
+            window.location.reload()
             ElMessage.success({
               message: "成为VIP成功",
               type: "success",
@@ -130,28 +138,30 @@ function toPaperDetailPage(paperId: number) {
   })
 }
 
-// async function initialize() {
-//   await getPaperDetail();
-//   getReference();
-//   getSimilar();
-//   getCategory();
-// }
-//
-// initialize();
+function handlePageChangeReference(page: number) {
+  currentPageReference.value = page;
+}
+
+function handlePageChangeSimilar(page: number) {
+  currentPageSimilar.value = page;
+}
+
+function handlePageChangeCategory(page: number) {
+  currentPageCategory.value = page;
+}
+
+
 getPaperDetail()
 
 </script>
 
 <template>
-  <!-- Paper Detail -->
   <div class="main-content">
     <div class="paper-details">
       <h2 class="paper-title">{{title}}</h2>
       <div class="paper-abstract">
         <div class="abstract">摘要</div>
-        <p>
-          {{abstract}}
-        </p>
+        <p>{{abstract}}</p>
       </div>
       <div class="paper-category">
         <div class="category">类别</div>
@@ -167,11 +177,34 @@ getPaperDetail()
         <el-tab-pane label="引用论文列表" name="reference"></el-tab-pane>
         <el-tab-pane label="相似论文列表" name="similar"></el-tab-pane>
         <el-tab-pane label="同类论文列表" name="category"></el-tab-pane>
-
       </el-tabs>
       <div class="paper-list">
         <template v-if="activeTab === 'reference' || role === 'VIP'">
           <paper-item v-for="item in getCurrentPaperList()" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
+          <el-pagination class="divider"
+              v-if="activeTab === 'reference' && referencePaper.length > pageSize"
+              :current-page="currentPageReference"
+              :page-size="pageSize"
+              :total="referencePaper.length"
+              @current-change="handlePageChangeReference"
+              layout="prev, pager, next">
+          </el-pagination>
+          <el-pagination class="divider"
+              v-if="activeTab === 'similar' && similarPaper.length > pageSize"
+              :current-page="currentPageSimilar"
+              :page-size="pageSize"
+              :total="similarPaper.length"
+              @current-change="handlePageChangeSimilar"
+              layout="prev, pager, next">
+          </el-pagination>
+          <el-pagination class="divider"
+              v-if="activeTab === 'category' && sameCategoryPaper.length > pageSize"
+              :current-page="currentPageCategory"
+              :page-size="pageSize"
+              :total="sameCategoryPaper.length"
+              @current-change="handlePageChangeCategory"
+              layout="prev, pager, next">
+          </el-pagination>
         </template>
         <template v-else>
           <div class="vip-message">
@@ -182,12 +215,6 @@ getPaperDetail()
       </div>
     </div>
   </div>
-
-  <!-- Tabs -->
-
-
-
-
 </template>
 
 <style scoped>
@@ -242,12 +269,7 @@ getPaperDetail()
   margin-bottom: 40px;
 }
 
-.paper-item {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}
+
 .vip-message {
   text-align: center;
   padding: 30px;
@@ -255,6 +277,13 @@ getPaperDetail()
   border-radius: 5px;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.divider {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  justify-content: center;
+
 }
 
 </style>

@@ -5,7 +5,7 @@ import {userRegister} from "../api/user.ts"
 import {ElMessage} from "element-plus";
 
 const username = ref('')
-const role = ref('')
+const role = ref('COMMON')
 const password = ref('')
 const confirmPassword = ref('')
 const email = ref('')
@@ -63,13 +63,13 @@ function handleRegister(){
             <label>用户名</label>
             <el-input id="username" type="text" v-model="username" required placeholder="请输入用户名"/>
           </el-form-item>
-          <el-form-item>
-            <label>权限</label>
-            <el-select v-model="role" placeholder="是否充值VIP">
-              <el-option label="普通用户" value="COMMON"></el-option>
-              <el-option label="至尊会员" value="VIP"></el-option>
-            </el-select>
-          </el-form-item>
+<!--          <el-form-item>-->
+<!--            <label>权限</label>-->
+<!--            <el-select v-model="role" placeholder="是否充值VIP">-->
+<!--              <el-option label="普通用户" value="COMMON"></el-option>-->
+<!--              <el-option label="至尊会员" value="VIP"></el-option>-->
+<!--            </el-select>-->
+<!--          </el-form-item>-->
           <el-form-item>
             <label>密码</label>
             <el-input id="password" type="password" v-model="password" required placeholder="••••••••"/>

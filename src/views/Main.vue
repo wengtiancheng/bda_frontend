@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {useRouter} from "vue-router";
-import { defineProps, ref } from 'vue';
+import { defineProps, ref, computed } from 'vue';
 import {Search} from "@element-plus/icons-vue";
 import {searchPaper} from "../api/paper.ts";
 
@@ -18,7 +18,13 @@ const username = sessionStorage.getItem('username') || '未登录'
 
 const currentPage = ref(1);
 
-const pageSize = 5;
+const pageSize = 10;
+
+const paginatedPapers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  const end = start + pageSize;
+  return paperList.value.slice(start, end);
+});
 
 function search() {
   if(input.value === ''){
@@ -67,20 +73,17 @@ function handlePageChange(page: number) {
     <div class="result-main">
       <h2 class="result-title">搜索结果</h2>
       <div class="paper-list">
-        <paper-item v-for="item in paperList" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
 
+        <paper-item v-for="item in paginatedPapers" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
+        <el-pagination
+            v-if="paperList.length > pageSize"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :total="paperList.length"
+            @current-change="handlePageChange"
+            layout="prev, pager, next">
+        </el-pagination>
       </div>
-      <el-pagination
-        v-if="paperList.length > pageSize"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total="paperList.length"
-        @current-change="handlePageChange"
-        layout="prev, pager, next">
-
-      </el-pagination>
-
-
     </div>
   </div>
 </template>
@@ -107,7 +110,7 @@ function handlePageChange(page: number) {
 .search-area {
   display: flex;
   justify-content: center;
-
+  gap: 20px;
   margin-bottom: 20px;
 }
 

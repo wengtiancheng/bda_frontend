@@ -4,13 +4,13 @@ import {useRouter} from "vue-router";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {User, Document, Discount} from "@element-plus/icons-vue"
 import {upgradeToVip} from "../api/user.ts";
-import {ref} from "vue";
+import {ref, computed} from "vue";
 
 const router = useRouter()
 const username = sessionStorage.getItem('username') || '未登录'
 const role = ref(sessionStorage.getItem('role') || 'error')
 
-
+const userStatus = computed(() => role.value === 'VIP' ? 'VIP用户' : '普通用户');
 
 function logout(){
   ElMessageBox.confirm(
@@ -61,6 +61,9 @@ function becomeVip(){
             sessionStorage.setItem('role', 'VIP')
             //更新role
             role.value = 'VIP'
+
+            //刷新页面
+            window.location.reload()
             ElMessage.success({
               message: "成为VIP成功",
               type: "success",
@@ -94,16 +97,18 @@ function becomeVip(){
 
 
       <el-col :span="12"></el-col>
-      <el-col :span="3" class="header-text">欢迎 {{username}}!</el-col>
+      <el-col :span="2" class="header-text">欢迎 {{username}}!</el-col>
 
 
 
 
-      <el-col :span="1" class="header-icon">
-        <a @click="becomeVip">
-          <el-icon :size="35" color="white" ><User /></el-icon>
-        </a>
-      </el-col>
+
+        <el-col :span="2" class="header-icon">
+          <a @click="becomeVip">
+            <span :style="{ color: 'white', fontSize: '15px' }">您当前是{{ userStatus }}</span>
+          </a>
+        </el-col>
+
 
 
       <el-col :span="1" class="header-icon">
