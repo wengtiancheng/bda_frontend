@@ -67,7 +67,7 @@ function handlePageChange(page: number) {
         <el-input v-model="input" placeholder="请输入关键字" style="width: 500px">
 
         </el-input>
-        <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
+        <el-button type="primary" :icon="Search"  @click="search">搜索</el-button>
       </div>
     </div>
     <div class="result-main">
@@ -143,5 +143,9 @@ function handlePageChange(page: number) {
 
   margin-top: 15%;
 }
-
+.el-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>
