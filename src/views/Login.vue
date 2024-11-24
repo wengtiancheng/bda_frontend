@@ -44,6 +44,11 @@ function handleLogin() {
 
         }else{
           console.log(res)
+            ElMessage.error({
+                message: res.data.msg,
+                type: "error",
+                center: true,
+            });
 
         }
     })

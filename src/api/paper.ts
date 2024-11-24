@@ -20,15 +20,15 @@ export const getPaperById = (paperId: number) => {
 }
 
 //获得同类型的所有论文
-export const getPaperByCategory = (category: string) => {
-    return axios.get(`${PAPER_MODULE}/category`, {params: {category}})
+export const getPaperByCategory = (category: string, excludePaperId: number) => {
+    return axios.get(`${PAPER_MODULE}/category`, {params: {category, excludePaperId}})
         .then(res => {
             return res
         })
 }
 
 //获得某一个论文的相似论文
-export const getSimilarPaper = (paperId: number) => {
+export const getSimilarPaper = (paperId: number, ) => {
     return axios.get(`${PAPER_MODULE}/similar`, {params: {paperId}})
         .then(res => {
             return res

@@ -73,16 +73,21 @@ function handlePageChange(page: number) {
     <div class="result-main">
       <h2 class="result-title">搜索结果</h2>
       <div class="paper-list">
+        <template v-if="paginatedPapers.length">
+                  <paper-item v-for="item in paginatedPapers" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
+                  <el-pagination
+                      v-if="paperList.length > pageSize"
+                      :current-page="currentPage"
+                      :page-size="pageSize"
+                      :total="paperList.length"
+                      @current-change="handlePageChange"
+                      layout="prev, pager, next">
+                  </el-pagination>
+        </template>
+        <template v-else >
+          <p class="no-result">未查询到相关论文</p>
+        </template>
 
-        <paper-item v-for="item in paginatedPapers" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
-        <el-pagination
-            v-if="paperList.length > pageSize"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            :total="paperList.length"
-            @current-change="handlePageChange"
-            layout="prev, pager, next">
-        </el-pagination>
       </div>
     </div>
   </div>
@@ -133,17 +138,10 @@ function handlePageChange(page: number) {
   align-items: center;
   gap: 10px;
 }
+.no-result{
+  font-size: 20px;
 
-.paper-card {
-  width: 80%;
-  text-align: left;
-  border: 1px solid #ddd;
-  padding: 15px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 15%;
 }
 
-.pagination {
-  margin-top: 20px;
-}
 </style>

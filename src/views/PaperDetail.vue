@@ -50,21 +50,22 @@ const paginatedCategoryPapers = computed(() => {
 
 
 function getPaperDetail() {
-  console.log(paperId)
+
 
   getPaperById(paperId).then(res => {
-    console.log(res)
+
     title.value = res.data.title
     abstract.value = res.data.abstractText
     category.value = res.data.category
     year.value = res.data.year
-    getPaperByCategory(category.value).then(res => {
+    getPaperByCategory(category.value, paperId).then(res => {
       sameCategoryPaper.value = res.data
     })
     getSimilarPaper(paperId).then(res => {
       similarPaper.value = res.data
     })
     getReferencePaper(paperId).then(res => {
+      console.log(res)
       referencePaper.value = res.data
     })
   })
@@ -158,18 +159,18 @@ getPaperDetail()
 <template>
   <div class="main-content">
     <div class="paper-details">
-      <h2 class="paper-title">{{title}}</h2>
+      <h2 class="paper-title">{{ title }}</h2>
       <div class="paper-abstract">
         <div class="abstract">摘要</div>
-        <p>{{abstract}}</p>
+        <p>{{ abstract }}</p>
       </div>
       <div class="paper-category">
         <div class="category">类别</div>
-        <p>{{category}}</p>
+        <p>{{ category }}</p>
       </div>
       <div class="paper-category">
         <div class="category">年份</div>
-        <p>{{year}}</p>
+        <p>{{ year }}</p>
       </div>
     </div>
     <div class="tabs-section">
@@ -179,43 +180,104 @@ getPaperDetail()
         <el-tab-pane label="同类论文列表" name="category"></el-tab-pane>
       </el-tabs>
       <div class="paper-list">
-        <template v-if="activeTab === 'reference' || role === 'VIP'">
-          <paper-item v-for="item in getCurrentPaperList()" :key="item.id" :paperId="item.id" :title="item.title" :category="item.category" :year="item.year" @click="toPaperDetailPage(item.id)"></paper-item>
-          <el-pagination class="divider"
-              v-if="activeTab === 'reference' && referencePaper.length > pageSize"
-              :current-page="currentPageReference"
-              :page-size="pageSize"
-              :total="referencePaper.length"
-              @current-change="handlePageChangeReference"
-              layout="prev, pager, next">
-          </el-pagination>
-          <el-pagination class="divider"
-              v-if="activeTab === 'similar' && similarPaper.length > pageSize"
-              :current-page="currentPageSimilar"
-              :page-size="pageSize"
-              :total="similarPaper.length"
-              @current-change="handlePageChangeSimilar"
-              layout="prev, pager, next">
-          </el-pagination>
-          <el-pagination class="divider"
-              v-if="activeTab === 'category' && sameCategoryPaper.length > pageSize"
-              :current-page="currentPageCategory"
-              :page-size="pageSize"
-              :total="sameCategoryPaper.length"
-              @current-change="handlePageChangeCategory"
-              layout="prev, pager, next">
-          </el-pagination>
+        <template v-if="activeTab === 'reference'">
+          <template v-if="referencePaper.length">
+            <paper-item
+                v-for="item in paginatedReferencePapers"
+                :key="item.id"
+                :paperId="item.id"
+                :title="item.title"
+                :category="item.category"
+                :year="item.year"
+                @click="toPaperDetailPage(item.id)"
+            ></paper-item>
+            <el-pagination
+                class="divider"
+                v-if="referencePaper.length > pageSize"
+                :current-page="currentPageReference"
+                :page-size="pageSize"
+                :total="referencePaper.length"
+                @current-change="handlePageChangeReference"
+                layout="prev, pager, next"
+            ></el-pagination>
+          </template>
+          <template v-else>
+            <p>暂无引用论文</p>
+          </template>
         </template>
-        <template v-else>
-          <div class="vip-message">
-            <p>只有VIP用户才能查看此内容</p>
-          </div>
-          <el-button type="primary" @click="becomeVip">成为VIP</el-button>
+
+        <template v-if="activeTab === 'similar'">
+          <template v-if="role === 'VIP'">
+            <template v-if="similarPaper.length">
+              <paper-item
+                  v-for="item in paginatedSimilarPapers"
+                  :key="item.id"
+                  :paperId="item.id"
+                  :title="item.title"
+                  :category="item.category"
+                  :year="item.year"
+                  @click="toPaperDetailPage(item.id)"
+              ></paper-item>
+              <el-pagination
+                  class="divider"
+                  v-if="similarPaper.length > pageSize"
+                  :current-page="currentPageSimilar"
+                  :page-size="pageSize"
+                  :total="similarPaper.length"
+                  @current-change="handlePageChangeSimilar"
+                  layout="prev, pager, next"
+              ></el-pagination>
+            </template>
+            <template v-else>
+              <p>暂无相似论文</p>
+            </template>
+          </template>
+          <template v-else>
+            <div class="vip-message">
+              <p>只有VIP用户才能查看此内容</p>
+              <el-button type="primary" @click="becomeVip">成为VIP</el-button>
+            </div>
+          </template>
+        </template>
+
+        <template v-if="activeTab === 'category'">
+          <template v-if="role === 'VIP'">
+            <template v-if="sameCategoryPaper.length">
+              <paper-item
+                  v-for="item in paginatedCategoryPapers"
+                  :key="item.id"
+                  :paperId="item.id"
+                  :title="item.title"
+                  :category="item.category"
+                  :year="item.year"
+                  @click="toPaperDetailPage(item.id)"
+              ></paper-item>
+              <el-pagination
+                  class="divider"
+                  v-if="sameCategoryPaper.length > pageSize"
+                  :current-page="currentPageCategory"
+                  :page-size="pageSize"
+                  :total="sameCategoryPaper.length"
+                  @current-change="handlePageChangeCategory"
+                  layout="prev, pager, next"
+              ></el-pagination>
+            </template>
+            <template v-else>
+              <p>暂无同类论文</p>
+            </template>
+          </template>
+          <template v-else>
+            <div class="vip-message">
+              <p>只有VIP用户才能查看此内容</p>
+              <el-button type="primary" @click="becomeVip">成为VIP</el-button>
+            </div>
+          </template>
         </template>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .main-content {

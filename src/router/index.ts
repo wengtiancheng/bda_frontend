@@ -27,21 +27,7 @@ const router = createRouter({
     }]
 })
 
-// router.beforeEach((to, _, next) => {
-//     const token: string | null = sessionStorage.getItem('token')
-//
-//
-//     if(!token) {
-//         if(to.path === '/login' || to.path === '/register') {
-//             next()
-//         } else {
-//             next('/login')
-//         }
-//         return
-//
-//     }
-//     next()
-// })
+
 
 
 export {router}
