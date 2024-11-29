@@ -14,6 +14,8 @@ const input = ref('');
 
 const paperList = ref([]);
 
+const hasSearched = ref(false);
+
 const username = sessionStorage.getItem('username') || '未登录'
 
 const currentPage = ref(1);
@@ -84,7 +86,7 @@ function handlePageChange(page: number) {
                       layout="prev, pager, next">
                   </el-pagination>
         </template>
-        <template v-else >
+        <template v-else-if="hasSearched" >
           <p class="no-result">未查询到相关论文</p>
         </template>
 

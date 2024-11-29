@@ -323,12 +323,16 @@ getPaperDetail()
 }
 
 .paper-list {
-  padding: 10px;
+  padding: 10px 20px;
   background-color: #f0f4f8;
   border-radius: 10px;
   margin-top: 10px;
   text-align: center;
   margin-bottom: 40px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 

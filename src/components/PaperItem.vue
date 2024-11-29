@@ -47,11 +47,13 @@ const props = defineProps({
 
 
   margin: 10px 0;
-
+  text-align: center;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 700px;
+  align-items: center;
 }
 
 .paper-content {
@@ -63,6 +65,7 @@ const props = defineProps({
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
+  line-height: 1.5;
 
   text-align: left;
 }

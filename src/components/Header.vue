@@ -96,14 +96,14 @@ function becomeVip(){
       </el-col>
 
 
-      <el-col :span="12"></el-col>
+      <el-col :span="11"></el-col>
       <el-col :span="2" class="header-text">欢迎 {{username}}!</el-col>
 
 
 
 
 
-        <el-col :span="2" class="header-icon">
+        <el-col :span="3" class="header-icon">
           <a @click="becomeVip">
             <span :style="{ color: 'white', fontSize: '15px' }">您当前是{{ userStatus }}</span>
           </a>
